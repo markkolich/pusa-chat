@@ -13,7 +13,6 @@ import com.kolich.common.util.secure.KolichStringSigner;
 import com.kolich.pusachat.spring.beans.ChatRooms;
 import com.kolich.pusachat.spring.controllers.AbstractPusaChatController;
 import com.kolich.pusachat.spring.controllers.PusaChatControllerClosure;
-import com.kolich.spring.beans.KolichWebAppProperties;
 
 @Controller
 @RequestMapping(value="/")
@@ -24,10 +23,9 @@ public class Index extends AbstractPusaChatController {
 	private static final String VIEW_NAME = "index";
 	
 	@Autowired
-	public Index(KolichWebAppProperties properties,
-		KolichStringSigner signer,
+	public Index(KolichStringSigner signer,
 		ChatRooms rooms) {
-		super(logger__, properties, signer, rooms);
+		super(logger__, signer, rooms);
 	}
 
 	@RequestMapping(method={RequestMethod.GET, RequestMethod.HEAD})

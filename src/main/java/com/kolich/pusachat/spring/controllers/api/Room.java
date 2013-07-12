@@ -19,7 +19,6 @@ import com.kolich.pusachat.entities.ChatRoom;
 import com.kolich.pusachat.spring.beans.ChatRooms;
 import com.kolich.pusachat.spring.controllers.AbstractPusaChatController;
 import com.kolich.pusachat.spring.controllers.PusaChatControllerClosure;
-import com.kolich.spring.beans.KolichWebAppProperties;
 
 @Controller
 @RequestMapping(value="/api/room")
@@ -32,10 +31,9 @@ public class Room extends AbstractPusaChatController {
 	private static final int DEFAULT_RANDOM_ROOM_NAME_LENGTH = 10;
 	
 	@Autowired
-	public Room(KolichWebAppProperties properties,
-		KolichStringSigner signer,
+	public Room(KolichStringSigner signer,
 		ChatRooms rooms) {
-		super(logger__, properties, signer, rooms);
+		super(logger__, signer, rooms);
 	}
 	
 	@RequestMapping(method={RequestMethod.GET, RequestMethod.HEAD},

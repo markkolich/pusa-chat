@@ -10,25 +10,41 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+		
+	<!-- Properties file location specific to Jetty deployments -->
+	<context:property-placeholder location="file:${jetty.home}/conf/pusachat.properties"
+    	ignore-unresolvable="true" ignore-resource-not-found="true" order="1" />
     
-    <!-- user configurable properties -->
-        
-    <bean id="PusaChatProperties"
-    	class="com.kolich.pusachat.beans.PusaChatProperties">
+    <!-- Properties file location specific to Tomcat deployments -->
+    <context:property-placeholder location="file:${catalina.home}/conf/pusachat.properties"
+    	ignore-unresolvable="true" ignore-resource-not-found="true" order="2" />
+    	
+    <!-- Application properties, used during development. -->
+	<context:property-placeholder location="classpath:override.pusachat.properties"
+		ignore-unresolvable="true" ignore-resource-not-found="true" order="3" />
+    	
+    <!-- The default application properties (packaged with .war) -->
+	<context:property-placeholder location="classpath:default.pusachat.properties"
+		ignore-unresolvable="true" order="4" />
+		
+	<bean id="PusaChatProperties"
+		class="com.kolich.pusachat.spring.PusaChatProperties">
     	<property name="properties">
-    		<util:map map-class="java.util.HashMap">
-    			<!-- Add properties here as needed. -->
-    		</util:map>
-    	</property>
-    </bean>
+            <util:map map-class="java.util.HashMap">
+            	<entry key="pusachat.app.version" value="${pusachat.app.version}" />
+            	<entry key="pusachat.app.mode" value="${pusachat.app.mode}" />
+            	<entry key="pusachat.context.path" value="${pusachat.context.path}" />
+            </util:map>
+	    </property>
+	</bean>
+	
+    <bean id="KolichStringSigner"
+   		class="com.kolich.common.util.secure.KolichStringSigner">
+   		<constructor-arg value="x6la53kE5drjrAECvma3hmlaH2Ewjkuj" />
+   	</bean>
     
-    <bean id="PusaChatStringSigner"
-   		class="com.kolich.pusachat.beans.PusaChatStringSigner">
-    	<property name="secret" value="x6la53kE5drjrAECvma3hmlaH2Ewjkuj" />
-    </bean>
-    
-    <bean id="ChatRooms" class="com.kolich.pusachat.beans.ChatRooms">
-    	<property name="signer" ref="PusaChatStringSigner" />
+    <bean id="ChatRooms" class="com.kolich.pusachat.spring.beans.ChatRooms">
+    	<property name="signer" ref="KolichStringSigner" />
     </bean>
     
 </beans>

@@ -9,33 +9,37 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 	        
-	<!-- Configures the @Controller programming model -->
-	<mvc:annotation-driven />
+	<!-- Configures the annotation programming model. -->
+	<context:annotation-config />
 
-	<!-- Scans the classpath of this application for @Components to deploy as beans -->
-	<context:component-scan base-package="com.kolich.pusachat.spring.controllers.api" />
+	<!-- Scans the classpath of this application for components to deploy as beans. -->
+	<context:component-scan base-package="com.kolich.pusachat.spring">
+		<context:include-filter type="annotation" expression="org.springframework.context.annotation.Configuration"/>
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
 	
 	<!-- Configures our default set of interceptors. -->
     <mvc:interceptors>
     
     	<mvc:interceptor>
-    		<mvc:mapping path="/*" />
-        	<bean class="com.kolich.pusachat.spring.interceptors.ExtensionInterceptor">
-        		<property name="extensionRegex" value="\/$" />
+    		<mvc:mapping path="/app/api/chat/**" />
+        	<bean class="com.kolich.spring.interceptors.RequestPathInterceptor">
+        		<property name="requestMappings">
+	       			<list value-type="java.lang.String">
+	       				<value>GET:\/((register\/[a-zA-Z0-9\-_]{1,200})|((event|log|message|typing|inactivity)\/[a-zA-Z0-9\-_]{1,200}))\.json$</value>
+	       			</list>
+	       		</property>
         	</bean>
     	</mvc:interceptor>
     	
     	<mvc:interceptor>
-    		<mvc:mapping path="/api/chat/**" />
-        	<bean class="com.kolich.pusachat.spring.interceptors.ExtensionInterceptor">
-        		<property name="extensionRegex" value="\/((register\/[a-zA-Z0-9\-_]{1,200})|((event|log|message|typing|inactivity)\/[a-zA-Z0-9\-_]{1,200}))\.json$" />
-        	</bean>
-    	</mvc:interceptor>
-    	    	
-    	<mvc:interceptor>
-    		<mvc:mapping path="/api/room/**" />
-        	<bean class="com.kolich.pusachat.spring.interceptors.ExtensionInterceptor">
-        		<property name="extensionRegex" value="\/(((create|join|random)\.json)|([a-zA-Z0-9\-_]{1,200}))$" />
+    		<mvc:mapping path="/app/api/room/**" />
+        	<bean class="com.kolich.spring.interceptors.RequestPathInterceptor">
+        		<property name="requestMappings">
+	       			<list value-type="java.lang.String">
+	       				<value>GET:\/(((create|join|random)\.json)|([a-zA-Z0-9\-_]{1,200}))$</value>
+	       			</list>
+	       		</property>
         	</bean>
     	</mvc:interceptor>
     	
@@ -43,8 +47,8 @@
 	
 	<!-- View resolvers -->
 	
-	<bean id="PusaChatContentNegotiatingViewResolver"
-		class="com.kolich.pusachat.spring.PusaChatContentNegotiatingViewResolver"
+	<bean id="KolichContentNegotiatingViewResolver"
+		class="com.kolich.spring.views.KolichContentNegotiatingViewResolver"
 		p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">	
 		<property name="mediaTypes">
 			<map>
@@ -54,17 +58,26 @@
 		</property>
 		<property name="defaultContentType" value="text/html" />
 		<property name="favorPathExtension" value="true" />
-		<property name="ignoreAcceptHeader" value="true" />		
+		<property name="ignoreAcceptHeader" value="true" />
 		<property name="viewResolvers">
 			<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
 				<property name="prefix" value="/WEB-INF/jsp/" />  
 				<property name="suffix" value=".jsp" />
+				<!--
+					A list of beans by name that can be directly accessed in the
+					view layer (in a JSP) using the ${...} notation.
+				-->
+				<property name="exposedContextBeanNames">
+      				<list value-type="java.lang.String">
+				         <value>PusaChatProperties</value>
+      				</list>
+   				</property>
 			</bean>
 		</property>
 		<property name="globalDefaultView" value="errors/404-not-found" />
 		<property name="defaultViews">
 			<list>
-				<bean class="com.kolich.pusachat.spring.mappers.MappingJsonView" />
+				<bean class="com.kolich.spring.views.mappers.KolichMappingJSONView" />
 			</list>
 		</property>
 	</bean>

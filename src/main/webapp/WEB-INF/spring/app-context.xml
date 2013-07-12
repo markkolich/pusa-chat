@@ -10,9 +10,6 @@
 	<!-- Configures all supporting beans -->
 	<import resource="beans.xml" />
 			
-	<!-- Timer threads on schedule -->
-	<import resource="beans.quartz.xml" />
-		
 	<!-- Configures Spring 3 MVC -->
 	<import resource="mvc.xml" />
 

@@ -22,7 +22,6 @@ import com.kolich.pusachat.entities.events.PusaChatEvent;
 import com.kolich.pusachat.spring.beans.ChatRooms;
 import com.kolich.pusachat.spring.controllers.AbstractPusaChatController;
 import com.kolich.pusachat.spring.controllers.PusaChatControllerClosure;
-import com.kolich.spring.beans.KolichWebAppProperties;
 
 @Controller
 @RequestMapping(value="/api/chat")
@@ -35,10 +34,9 @@ public class Chat extends AbstractPusaChatController {
 	private static final int DEFAULT_BOSH_WAIT_IN_SECONDS = 20;
 		
 	@Autowired
-	public Chat(KolichWebAppProperties properties,
-		KolichStringSigner signer,
+	public Chat(KolichStringSigner signer,
 		ChatRooms rooms) {
-		super(logger__, properties, signer, rooms);
+		super(logger__, signer, rooms);
 	}
 	
 	@RequestMapping(method={RequestMethod.POST},
@@ -93,23 +91,7 @@ public class Chat extends AbstractPusaChatController {
 			}
 		}.execute();
 	}
-	
-	/*
-	@RequestMapping(method={RequestMethod.GET, RequestMethod.HEAD},
-		value="/log/{token}")
-	public ModelAndView log(@PathVariable final String token) {
-		return new PusaChatControllerClosure<ModelAndView>(
-			"GET:/api/chat/log/" + token, logger__) {
-			@Override
-			public ModelAndView doit() throws Exception {
-				final PusaChatSession session = getSession(token);
-				return getModelAndView(VIEW_NAME,
-					getChatLog(session.getRoomId()));
-			}
-		}.execute();
-	}
-	*/
-	
+		
 	@RequestMapping(method={RequestMethod.POST},
 		value="/message/{token}")
 	public ModelAndView message(@PathVariable final String token,

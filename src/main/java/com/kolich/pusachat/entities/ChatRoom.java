@@ -202,7 +202,7 @@ public final class ChatRoom extends PusaChatEntity {
 			if(session.getLastAccessed().before(expiry)) {
 				logger__.info("Client left room (clientId=" + clientId +
 					", roomId=" + roomId_ + ", lastAccessed=" +
-						session.getLastAccessed() + ")");
+					session.getLastAccessed() + ")");
 				sessions_.remove(clientId);
 				typing_.remove(clientId);
 				inactive_.remove(clientId);

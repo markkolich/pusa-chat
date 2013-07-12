@@ -18,7 +18,7 @@ var PusaChat = (function($, parent, document, undefined) {
 		// must be in development.  In which case, the path below
 		// will not be '/' but rather something behind Tomcat.
 		debug = !!($.inArray(hostname, domains) == -1),
-		path = (debug ? '/pusa-chat/' : '/pusa/'),
+		path = (debug ? '/' : '/pusa-chat/'),
 		api = path + 'api/',
 		
 		// Dynamically build the base app URL.

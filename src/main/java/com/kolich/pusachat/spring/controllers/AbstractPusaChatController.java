@@ -26,7 +26,6 @@ import com.kolich.pusachat.entities.events.Typing;
 import com.kolich.pusachat.exceptions.BadChatTokenException;
 import com.kolich.pusachat.exceptions.InvalidRoomNameException;
 import com.kolich.pusachat.spring.beans.ChatRooms;
-import com.kolich.spring.beans.KolichWebAppProperties;
 
 public abstract class AbstractPusaChatController {
 	
@@ -38,7 +37,6 @@ public abstract class AbstractPusaChatController {
 			
 	protected final Logger logger_;
 	
-	protected final KolichWebAppProperties properties_;
 	protected final KolichStringSigner signer_;
 	protected final ChatRooms rooms_;
 	
@@ -57,11 +55,9 @@ public abstract class AbstractPusaChatController {
 				.build());
 	
 	protected AbstractPusaChatController(Logger logger,
-		KolichWebAppProperties properties,
 		KolichStringSigner signer,
 		ChatRooms rooms) {
 		logger_ = logger;
-		properties_ = properties;
 		signer_ = signer;
 		rooms_ = rooms;
 	}
@@ -157,8 +153,8 @@ public abstract class AbstractPusaChatController {
 	protected String createToken(final UUID roomId, final UUID clientId) {
 		checkNotNull(roomId, "Oops, room UUID cannot be null!");
 		checkNotNull(clientId, "Oops, client UUID cannot be null!");
-		// Probably don't need to call toString() on the UUID's but I'm
-		// being pedantic so fuck you, go eat a shit burger.
+		// Probably don't need to call toString() on the UUID's but
+		// I'm being pedantic.
 		return signer_.sign(roomId.toString() + TOKEN_DELIMITER +
 			clientId.toString());
 	}
@@ -181,7 +177,7 @@ public abstract class AbstractPusaChatController {
 		}
 	}
 		
-	private static String[] getTokensFromPayload(final String payload) {
+	private static final String[] getTokensFromPayload(final String payload) {
 		checkNotNull(payload, "Oops, token payload cannot be null!");
 		return payload.split(TOKEN_DELIMITER, 2 /* important */);
 	}

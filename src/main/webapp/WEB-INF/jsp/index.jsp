@@ -2,10 +2,6 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<%@ taglib prefix="parameter" uri="com.kolich.pusachat.tags.parameter" %>
-<%@ taglib prefix="environment" uri="com.kolich.pusachat.tags.environment" %>
-<%@ taglib prefix="util" uri="com.kolich.pusachat.tags.util" %>
-
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Date" %>
 
@@ -45,7 +41,6 @@ pageContext.setAttribute("year", new SimpleDateFormat("yyyy").format(new Date())
 		</div>
 		
 		<h4>&copy; Copyright <c:out value="${year}" /> Mark S. Kolich</h4>
-		<h4><parameter:version /> | <parameter:build-date /></h4>
 		
 		<jsp:include page="includes/scripts.jsp" />
 			

@@ -1,18 +1,33 @@
 package com.kolich.pusachat.spring.beans;
 
+import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.kolich.common.util.secure.KolichStringSigner;
 import com.kolich.pusachat.entities.ChatRoom;
+import com.kolich.pusachat.entities.events.PusaChatEvent;
 import com.kolich.pusachat.exceptions.RoomNotFoundException;
 
-public final class ChatRooms implements InitializingBean {
+public final class ChatRooms implements InitializingBean, DisposableBean {
+	
+	private static final Logger logger__ =
+		LoggerFactory.getLogger(ChatRooms.class);
 	
 	private Map<UUID, ChatRoom> chatRooms_;
 	
@@ -21,12 +36,33 @@ public final class ChatRooms implements InitializingBean {
 	
 	private KolichStringSigner signer_;
 	
+	private ScheduledExecutorService executor_;
+	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		chatRooms_ = new ConcurrentHashMap<UUID, ChatRoom>();
 		// Reverse maps.
 		keysToRooms_ = new ConcurrentHashMap<String, UUID>();
 		roomsToKeys_ = new ConcurrentHashMap<UUID, String>();
+		// Setup a new thread factory builder.
+		executor_ = newSingleThreadScheduledExecutor(
+			new ThreadFactoryBuilder()
+				.setDaemon(true)
+				.setNameFormat("inactive-user-cleaner-%d")
+				.build());
+		// Schedule a new cleaner at a "fixed" interval.
+		executor_.scheduleAtFixedRate(
+			new InactiveUserCleanerExecutor(this),
+			0L,
+			60L,
+			SECONDS);
+	}
+	
+	@Override
+	public void destroy() throws Exception {
+		if(executor_ != null) {
+			executor_.shutdown();
+		}
 	}
 	
 	public synchronized ChatRoom getRoom(final UUID roomId) {
@@ -92,6 +128,61 @@ public final class ChatRooms implements InitializingBean {
 	
 	public void setSigner(KolichStringSigner signer) {
 		signer_ = signer;
+	}
+	
+	private final class InactiveUserCleanerExecutor implements Runnable {
+		
+		private static final long DEFAULT_ONE_MINUTE_IN_MS = 60000L;
+		
+		/**
+		 * How "old" inactive users can be before they are considered
+		 * absent from the room.
+		 */
+		private final long expiry_;
+		
+		private final ChatRooms rooms_;
+		
+		private InactiveUserCleanerExecutor(final ChatRooms rooms,
+			final long expiry) {
+			rooms_ = rooms;
+			expiry_ = expiry;
+		}
+		
+		private InactiveUserCleanerExecutor(final ChatRooms rooms) {
+			this(rooms, DEFAULT_ONE_MINUTE_IN_MS);
+		}
+
+		@Override
+		public void run() {
+			try {
+				// Destroy all users who haven't ping'ed the room within X-seconds.
+				final Date when = new Date(currentTimeMillis() - expiry_);
+				// List all rooms, and cleanup each one.
+				final Set<UUID> rooms = rooms_.getAllRooms();
+				for(final UUID roomId : rooms) {
+					try {
+						final ChatRoom room = rooms_.getRoom(roomId);
+						// Remove all clients from the room who haven't pinged
+						// us since "when", the expiry.
+						if(room.removeInactiveClients(when)) {
+							// If we did remove a client, then let everyone in
+							// the room know about the event.
+							room.postEvents(Arrays.asList(new PusaChatEvent[]{
+								room.getClientStatus(),
+								room.getTyping()
+							}));
+						}
+					} catch (RoomNotFoundException rnfe) {
+						logger__.warn("Room (" + roomId.toString() + ") was " +
+							"in rooms list, but seems to have disappeared; " +
+								"can't remove inactive users.");
+					}
+				}
+			} catch (Exception e) {
+				logger__.warn("Failed to remove inactive users.", e);
+			}
+		}
+		
 	}
 	
 }

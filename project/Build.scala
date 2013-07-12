@@ -38,7 +38,8 @@ object Dependencies {
 
   // Internal dependencies
 
-  private val kolichSpring = "com.kolich" % "kolich-spring" % "0.0.7" % "compile"
+  private val kolichSpring = "com.kolich" % "kolich-spring" % "0.0.7" % "compile" exclude("com.kolich", "kolich-common")
+  private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
 
   // External dependencies
 
@@ -61,15 +62,12 @@ object Dependencies {
   private val commonsCodec = "commons-codec" % "commons-codec" % "1.6" % "compile"
   private val commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.1" % "compile"
 
-  private val quartz = "org.quartz-scheduler" % "quartz" % "1.8.6" % "compile"
-
-  val webAppDeps = Seq(kolichSpring,
+  val webAppDeps = Seq(kolichSpring, kolichCommon,
     jettyWebApp, jettyPlus, jettyJsp,
     jspApi, jstl, servlet,
     urlrewrite,
     logback, logbackClassic, slf4j, jclOverSlf4j,
-    commonsCodec, commonsLang3,
-    quartz)
+    commonsCodec, commonsLang3)
 
 }
 
@@ -227,17 +225,11 @@ object PusaChat extends Build {
       // resulting JAR into a more meaningful location.
       artifactPath in (Test, packageBin) ~= { defaultPath =>
         file("dist") / "test" / defaultPath.getName
-      } /*,      
-      externalDependencyClasspath in Compile <++= baseDirectory map { base =>
-      	val util = base / "util"
-      	Seq(util / "yuicompressor-2.4.2.jar",
-		    util / "yui-compressor-ant-task-0.5.jar",
-		    util / "google-closure-compiler-r2180.jar")
-      }*/ ) ++
+      }) ++
       // Xsbt-web-plugin settings.
       XSBTWebPluginConfig.settings ++
       // Include the relevant settings for JS and CSS "compilation".
-      PackageJS.settings ++ PackageCSS.settings ++
+      //PackageJS.settings ++ PackageCSS.settings ++
       // Eclipse project plugin settings.
       SBTEclipsePluginConfig.settings)
 
