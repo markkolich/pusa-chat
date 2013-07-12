@@ -59,6 +59,7 @@ object Dependencies {
   private val jclOverSlf4j = "org.slf4j" % "jcl-over-slf4j" % "1.6.6" % "compile"
 
   private val commonsCodec = "commons-codec" % "commons-codec" % "1.6" % "compile"
+  private val commonsLang3 = "org.apache.commons" % "commons-lang3" % "3.1" % "compile"
 
   private val quartz = "org.quartz-scheduler" % "quartz" % "1.8.6" % "compile"
 
@@ -67,7 +68,7 @@ object Dependencies {
     jspApi, jstl, servlet,
     urlrewrite,
     logback, logbackClassic, slf4j, jclOverSlf4j,
-    commonsCodec,
+    commonsCodec, commonsLang3,
     quartz)
 
 }
@@ -198,6 +199,14 @@ object PusaChat extends Build {
       unmanagedSourceDirectories in Compile in packageSrc <<= baseDirectory(new File(_, "src/main/java"))(Seq(_)),
       // Override the SBT default "target" directory for compiled classes.
       classDirectory in Compile <<= baseDirectory(new File(_, "target/classes")),
+      // Add the local 'config' directory to the classpath at runtime,
+      // so anything there will ~not~ be packaged with the application deliverables.
+      // Things like application configuration .properties files go here in
+      // development and so these will not be packaged+shipped with a build.
+      // But, they are still available on the classpath during development,
+      // like when you run Jetty via the xsbt-web-plugin that looks for some
+      // configuration file or .properties file on the classpath.
+      unmanagedClasspath in Runtime <+= (baseDirectory) map { bd => Attributed.blank(bd / "config") },
       // Do not bother trying to publish artifact docs (scaladoc, javadoc). Meh.
       publishArtifact in packageDoc := false,
       // Override the global name of the artifact.
