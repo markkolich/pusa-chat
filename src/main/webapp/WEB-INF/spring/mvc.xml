@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+	        
+	<!-- Configures the @Controller programming model -->
+	<mvc:annotation-driven />
+
+	<!-- Scans the classpath of this application for @Components to deploy as beans -->
+	<context:component-scan base-package="com.kolich.pusachat.spring.controllers.api" />
+	
+	<!-- Configures our default set of interceptors. -->
+    <mvc:interceptors>
+    
+    	<mvc:interceptor>
+    		<mvc:mapping path="/*" />
+        	<bean class="com.kolich.pusachat.spring.interceptors.ExtensionInterceptor">
+        		<property name="extensionRegex" value="\/$" />
+        	</bean>
+    	</mvc:interceptor>
+    	
+    	<mvc:interceptor>
+    		<mvc:mapping path="/api/chat/**" />
+        	<bean class="com.kolich.pusachat.spring.interceptors.ExtensionInterceptor">
+        		<property name="extensionRegex" value="\/((register\/[a-zA-Z0-9\-_]{1,200})|((event|log|message|typing|inactivity)\/[a-zA-Z0-9\-_]{1,200}))\.json$" />
+        	</bean>
+    	</mvc:interceptor>
+    	    	
+    	<mvc:interceptor>
+    		<mvc:mapping path="/api/room/**" />
+        	<bean class="com.kolich.pusachat.spring.interceptors.ExtensionInterceptor">
+        		<property name="extensionRegex" value="\/(((create|join|random)\.json)|([a-zA-Z0-9\-_]{1,200}))$" />
+        	</bean>
+    	</mvc:interceptor>
+    	
+    </mvc:interceptors>
+	
+	<!-- View resolvers -->
+	
+	<bean id="PusaChatContentNegotiatingViewResolver"
+		class="com.kolich.pusachat.spring.PusaChatContentNegotiatingViewResolver"
+		p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">	
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+				<entry key="html" value="text/html" />
+			</map>
+		</property>
+		<property name="defaultContentType" value="text/html" />
+		<property name="favorPathExtension" value="true" />
+		<property name="ignoreAcceptHeader" value="true" />		
+		<property name="viewResolvers">
+			<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+				<property name="prefix" value="/WEB-INF/jsp/" />  
+				<property name="suffix" value=".jsp" />
+			</bean>
+		</property>
+		<property name="globalDefaultView" value="errors/404-not-found" />
+		<property name="defaultViews">
+			<list>
+				<bean class="com.kolich.pusachat.spring.mappers.MappingJsonView" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.springframework.web.HttpRequestMethodNotSupportedException">errors/404-not-found</prop>
+				<prop key="org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException">errors/404-not-found</prop>
+				<prop key="org.springframework.web.bind.MissingServletRequestParameterException">errors/400-bad-request</prop>
+				<prop key="com.kolich.pusachat.exceptions.InvalidApiExtensionException">errors/404-not-found</prop>
+				<prop key="com.kolich.pusachat.exceptions.RoomNotFoundException">errors/404-not-found</prop>
+				<prop key="com.kolich.pusachat.exceptions.InvalidRoomNameException">errors/400-bad-request</prop>
+				<prop key="com.kolich.pusachat.exceptions.NoChatRoomQueueFoundForSessionException">errors/412-precondition-failed</prop>
+				<prop key="com.kolich.pusachat.exceptions.ClientNotRegisteredWithChatRoomException">errors/412-precondition-failed</prop>
+				<prop key="com.kolich.pusachat.exceptions.BadChatTokenException">errors/400-bad-request</prop>												
+				<prop key="com.kolich.pusachat.PusaChatException">errors/503-service-unavailable</prop>
+				<prop key="java.lang.IllegalArgumentException">errors/400-bad-request</prop>
+			</props>
+		</property>
+		<property name="statusCodes">
+			<props>
+				<prop key="errors/400-bad-request">400</prop>
+				<prop key="errors/404-not-found">404</prop>
+				<prop key="errors/412-unsupported-browser">412</prop>
+				<prop key="errors/412-precondition-failed">412</prop>				
+				<prop key="errors/500-uncaught">500</prop>
+				<prop key="errors/503-service-unavailable">503</prop>
+			</props>
+		</property>
+		<property name="defaultStatusCode" value="404" />
+	</bean>
+	
+	<!-- It annoys me that all of my other bean ID's are CamelCase.  However,
+			in this instance, the id has to start with a lower case letter so
+			all beans in this context don't seem to necessairly follow the same
+			pricipal. -->
+	<bean class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
+		id="messageSource" p:basenames="WEB-INF/i18n/messages"
+			p:fallbackToSystemLocale="false" />
+	
+</beans>

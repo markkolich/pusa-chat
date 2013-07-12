@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.kolich.common.util.secure.KolichStringSigner;
 import com.kolich.pusachat.spring.beans.ChatRooms;
 import com.kolich.pusachat.spring.controllers.AbstractPusaChatController;
+import com.kolich.pusachat.spring.controllers.PusaChatControllerClosure;
 import com.kolich.spring.beans.KolichWebAppProperties;
 
 @Controller

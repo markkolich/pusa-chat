@@ -21,8 +21,8 @@ import com.kolich.pusachat.entities.events.NoOp;
 import com.kolich.pusachat.entities.events.PusaChatEvent;
 import com.kolich.pusachat.spring.beans.ChatRooms;
 import com.kolich.pusachat.spring.controllers.AbstractPusaChatController;
+import com.kolich.pusachat.spring.controllers.PusaChatControllerClosure;
 import com.kolich.spring.beans.KolichWebAppProperties;
-import com.kolich.spring.controllers.KolichControllerClosure;
 
 @Controller
 @RequestMapping(value="/api/chat")
@@ -44,7 +44,7 @@ public class Chat extends AbstractPusaChatController {
 	@RequestMapping(method={RequestMethod.POST},
 		value="/register/{roomToken}")
 	public ModelAndView register(@PathVariable final String roomToken) {
-		return new KolichControllerClosure<ModelAndView>(
+		return new PusaChatControllerClosure<ModelAndView>(
 			"POST:/api/chat/register/" + roomToken, logger__) {
 			@Override
 			public ModelAndView doit() throws Exception {
@@ -61,7 +61,7 @@ public class Chat extends AbstractPusaChatController {
 	@RequestMapping(method={RequestMethod.GET, RequestMethod.HEAD},
 		value="/event/{token}")
 	public ModelAndView event(@PathVariable final String token) {
-		return new KolichControllerClosure<ModelAndView>(
+		return new PusaChatControllerClosure<ModelAndView>(
 			"GET:/api/chat/event/" + token, logger__) {
 			@Override
 			public ModelAndView doit() throws Exception {
@@ -114,7 +114,7 @@ public class Chat extends AbstractPusaChatController {
 		value="/message/{token}")
 	public ModelAndView message(@PathVariable final String token,
 		@RequestParam(required=true) final String message) {
-		return new KolichControllerClosure<ModelAndView>(
+		return new PusaChatControllerClosure<ModelAndView>(
 			"POST:/api/chat/message/" + token, logger__) {
 			@Override
 			public ModelAndView doit() throws Exception {
@@ -131,7 +131,7 @@ public class Chat extends AbstractPusaChatController {
 		value="/message/{token}")
 	public ModelAndView deleteMessage(@PathVariable final String token,
 		@RequestBody final MultiValueMap<String, String> params) {
-		return new KolichControllerClosure<ModelAndView>(
+		return new PusaChatControllerClosure<ModelAndView>(
 			"DELETE:/api/chat/message/" + token, logger__) {
 			@Override
 			public ModelAndView doit() throws Exception {
@@ -148,7 +148,7 @@ public class Chat extends AbstractPusaChatController {
 		value="/typing/{token}")
 	public ModelAndView typing(@PathVariable final String token,
 		@RequestParam(required=true) final boolean typing) {
-		return new KolichControllerClosure<ModelAndView>(
+		return new PusaChatControllerClosure<ModelAndView>(
 			"POST:/api/chat/typing/" + token + "?typing=" + typing, logger__) {
 			@Override
 			public ModelAndView doit() throws Exception {
@@ -165,7 +165,7 @@ public class Chat extends AbstractPusaChatController {
 		value="/inactivity/{token}")
 	public ModelAndView inactivity(@PathVariable final String token,
 		@RequestParam(required=true) final boolean active) {
-		return new KolichControllerClosure<ModelAndView>(
+		return new PusaChatControllerClosure<ModelAndView>(
 			"POST:/api/chat/inactivity/" + token + "?active=" + active, logger__) {
 			@Override
 			public ModelAndView doit() throws Exception {

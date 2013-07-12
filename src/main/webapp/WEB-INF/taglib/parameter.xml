@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+	version="2.1">
+	
+	<tlibversion>1.0</tlibversion>
+	<jsp-version>2.2</jsp-version>
+	
+	<info>Pusa Chat specific servlet context initialization parameters.</info>
+	
+	<!-- These are set in the web-app context file using the <Parameter> tag -->
+		
+	<tag>
+		<name>context-path</name>
+		<tagclass>com.kolich.pusachat.spring.tags.parameters.ContextPath</tagclass>
+		<bodycontent>empty</bodycontent>
+		<info>Retrieve the contextPath context init parameter.</info>
+		<attribute>
+        	<name>bindToVar</name>
+        	<required>false</required>
+        	<rtexprvalue>true</rtexprvalue>
+      	</attribute>
+	</tag>
+	
+	<tag>
+		<name>version</name>
+		<tagclass>com.kolich.pusachat.spring.tags.parameters.Version</tagclass>
+		<bodycontent>empty</bodycontent>
+		<info>Retrieve the version context init parameter.</info>
+		<attribute>
+        	<name>bindToVar</name>
+        	<required>false</required>
+        	<rtexprvalue>true</rtexprvalue>
+      	</attribute>
+	</tag>
+	
+	<tag>
+		<name>build-date</name>
+		<tagclass>com.kolich.pusachat.spring.tags.parameters.BuildDate</tagclass>
+		<bodycontent>empty</bodycontent>
+		<info>Retrieve the build date context init parameter.</info>
+		<attribute>
+        	<name>bindToVar</name>
+        	<required>false</required>
+        	<rtexprvalue>true</rtexprvalue>
+      	</attribute>
+	</tag>
+	
+	<tag>
+		<name>mode</name>
+		<tagclass>com.kolich.pusachat.spring.tags.parameters.Mode</tagclass>
+		<bodycontent>empty</bodycontent>
+		<info>Returns the current web-application mode.</info>
+		<attribute>
+        	<name>bindToVar</name>
+        	<required>false</required>
+        	<rtexprvalue>true</rtexprvalue>
+      	</attribute>
+	</tag>
+	
+</taglib>

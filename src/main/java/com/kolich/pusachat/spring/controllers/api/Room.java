@@ -18,6 +18,7 @@ import com.kolich.common.util.secure.KolichStringSigner;
 import com.kolich.pusachat.entities.ChatRoom;
 import com.kolich.pusachat.spring.beans.ChatRooms;
 import com.kolich.pusachat.spring.controllers.AbstractPusaChatController;
+import com.kolich.pusachat.spring.controllers.PusaChatControllerClosure;
 import com.kolich.spring.beans.KolichWebAppProperties;
 
 @Controller

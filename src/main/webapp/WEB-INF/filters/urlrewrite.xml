@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 3.2//EN" "http://tuckey.org/res/dtds/urlrewrite3.2.dtd">
+<urlrewrite default-match-type="wildcard">
+	
+	<!-- Set last="true" so that if the incoming URL matches
+			a static resource, then we match and stop processing
+			any other patterns. -->
+	
+	<!-- Static resource rules -->
+	<rule>
+		<from>/images/**</from>
+		<to last="true">/WEB-INF/static/images/$1</to>
+	</rule>
+	
+	<!--
+		JavaScript and CSS files are served from the 'release' directory
+		which is where our JS anc CSS files live once they are compiled
+		and minified by Google's Closure Compiler and YUI Compressor
+		at WAR build time.
+	-->
+	
+	<rule>
+		<!-- Only apply this rule if a debug=true query parameter is set. -->
+		<condition type="parameter" name="debug">true</condition>
+		<from>/js/**</from>
+		<to last="true">/WEB-INF/static/js/$1</to>
+	</rule>
+	<rule>
+		<from>/js/**</from>
+		<to last="true">/WEB-INF/static/release/$1</to>
+	</rule>
+	
+	<rule>
+		<!-- Only apply this rule if a debug=true query parameter is set. -->
+		<condition type="parameter" name="debug">true</condition>
+		<from>/css/**</from>
+		<to last="true">/WEB-INF/static/css/$1</to>
+	</rule>
+	<rule>
+		<from>/css/**</from>
+		<to last="true">/WEB-INF/static/release/$1</to>
+	</rule>
+	
+	<!-- robots.txt -->
+	<rule>
+		<from>/robots.txt</from>
+		<to last="true">/WEB-INF/static/other/robots.txt</to>
+	</rule>
+	
+	<!-- favicon -->
+	<rule>
+		<from>/favicon.ico</from>
+		<to last="true">/WEB-INF/static/images/favicon.ico</to>
+	</rule>
+	
+	<!-- Base application -->	
+	<rule>
+		<from>/**</from>
+		<to>/app/$1</to>
+	</rule>
+
+	<outbound-rule>
+		<from>/app/**</from>
+		<to>/$1</to>
+	</outbound-rule>
+	
+</urlrewrite>

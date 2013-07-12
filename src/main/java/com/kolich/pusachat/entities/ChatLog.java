@@ -22,17 +22,10 @@ public final class ChatLog extends PusaChatEntity {
 	 * The maximum number of messages allowed in this log.
 	 */
 	private transient int maxMessages_;
-
-	/**
-	 * An internal tag used to track the K,V store "version"
-	 * of this log as fetched from the store.
-	 */
-	private transient String eTag_;
 	
 	public ChatLog(int maxMessages, String eTag) {
 		messages_ = new LinkedList<Message>();
 		maxMessages_ = maxMessages;
-		eTag_ = eTag;
 	}
 	
 	public ChatLog(String eTag) {
@@ -78,15 +71,6 @@ public final class ChatLog extends PusaChatEntity {
 	
 	public synchronized ChatLog clearMessages() {
 		messages_.clear();
-		return this;
-	}
-	
-	public String getETag() {
-		return eTag_;
-	}
-	
-	public ChatLog setETag(String eTag) {
-		eTag_ = eTag;
 		return this;
 	}
 	
