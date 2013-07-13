@@ -91,6 +91,20 @@ public class Chat extends AbstractPusaChatController {
 			}
 		}.execute();
 	}
+	
+	@RequestMapping(method={RequestMethod.GET, RequestMethod.HEAD},
+		value="/log/{token}")
+	public ModelAndView log(@PathVariable final String token) {
+		return new PusaChatControllerClosure<ModelAndView>(
+			"GET:/api/chat/log/" + token, logger__) {
+			@Override
+			public ModelAndView doit() throws Exception {
+			final PusaChatSession session = getSession(token);
+				return getModelAndView(VIEW_NAME,
+					getChatLog(session.getRoomId()));
+			}
+		}.execute();
+	}
 		
 	@RequestMapping(method={RequestMethod.POST},
 		value="/message/{token}")

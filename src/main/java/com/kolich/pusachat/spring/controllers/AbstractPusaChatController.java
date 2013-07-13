@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.kolich.common.util.secure.KolichStringSigner;
+import com.kolich.pusachat.entities.ChatLog;
 import com.kolich.pusachat.entities.ChatRoom;
 import com.kolich.pusachat.entities.PusaChatSession;
 import com.kolich.pusachat.entities.events.ClientJoined;
@@ -88,6 +89,13 @@ public abstract class AbstractPusaChatController {
 			public void run() {
 				// Post the event to all clients in the room.
 				room.postEvent(event);
+				// Only need to persist events of type "Message" to log
+				// chat messages -- any other event is dropped on the floor.
+				if(event instanceof Message) {
+					room.getChatLog().addMessage(event);
+				} else if(event instanceof Delete) {
+					room.getChatLog().deleteMessage(event);
+				}
 			}
 		});
 	}
@@ -149,7 +157,11 @@ public abstract class AbstractPusaChatController {
 		postEvent(room, status);
 		return status;
 	}
-			
+	
+	protected ChatLog getChatLog(final UUID roomId) {
+		return getRoom(roomId).getChatLog();
+	}
+		
 	protected String createToken(final UUID roomId, final UUID clientId) {
 		checkNotNull(roomId, "Oops, room UUID cannot be null!");
 		checkNotNull(clientId, "Oops, client UUID cannot be null!");

@@ -1,12 +1,15 @@
 package com.kolich.pusachat.entities;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Queue;
 
+import com.google.common.collect.ForwardingQueue;
 import com.google.gson.annotations.SerializedName;
 import com.kolich.pusachat.entities.events.Message;
+import com.kolich.pusachat.entities.events.PusaChatEvent;
 
 public final class ChatLog extends PusaChatEntity {
 	
@@ -16,62 +19,28 @@ public final class ChatLog extends PusaChatEntity {
 	private static final int DEFAULT_MAX_MESSAGE_EVENT_LOG_SIZE = 50;
 
 	@SerializedName("log")
-	private List<Message> messages_;
-
-	/**
-	 * The maximum number of messages allowed in this log.
-	 */
-	private transient int maxMessages_;
+	private Queue<PusaChatEvent> messages_;
 	
-	public ChatLog(int maxMessages, String eTag) {
-		messages_ = new LinkedList<Message>();
-		maxMessages_ = maxMessages;
-	}
-	
-	public ChatLog(String eTag) {
-		this(DEFAULT_MAX_MESSAGE_EVENT_LOG_SIZE, eTag);
+	public ChatLog(int maxMessages) {
+		messages_ = new BoundedQueue<PusaChatEvent>(maxMessages);
 	}
 	
 	public ChatLog() {
-		this(null);
+		this(DEFAULT_MAX_MESSAGE_EVENT_LOG_SIZE);
 	}
 	
-	public synchronized ChatLog addMessage(Message message) {
-		messages_.add(message);
-		// If the new size is greater than the maximum number of allowed
-		// messages in this log, remove the first entity.
-		if(messages_.size() > maxMessages_) {
-			messages_.remove(0);
-		}
-		// Sort validation (to ensure that the list stays sorted).
-		// Uses a custom Comparator inline because the messages in the log
-		// should be sorted where the newest message is at the bottom.
-		Collections.sort(messages_, new Comparator<Message>() {
-			@Override
-			public int compare(final Message m1, final Message m2) {
-				// the value 0 if the argument Date is equal to this Date; a
-				// value less than 0 if this Date is before the Date argument;
-				// and a value greater than 0 if this Date is after the Date
-				// argument.
-				if(m1.getWhen().equals(m2.getWhen())) {
-					return 0;
-				} else if(m1.getWhen().before(m2.getWhen())) {
-					return -1;
-				} else {
-					return 1;
-				}
-			}
-		});
+	public synchronized ChatLog addMessage(PusaChatEvent event) {
+		messages_.add(event);		
+		return this;
+	}
+	
+	public synchronized ChatLog deleteMessage(PusaChatEvent event) {
+		messages_.remove(event);
 		return this;
 	}
 		
 	public synchronized List<Message> getMessages() {
-		return Collections.unmodifiableList(messages_);
-	}
-	
-	public synchronized ChatLog clearMessages() {
-		messages_.clear();
-		return this;
+		return Arrays.asList(messages_.toArray(new Message[]{}));
 	}
 	
 	@Override
@@ -97,6 +66,41 @@ public final class ChatLog extends PusaChatEntity {
 		} else if (!messages_.equals(other.messages_))
 			return false;
 		return true;
+	}
+	
+	private static final class BoundedQueue<T> extends ForwardingQueue<T> {
+		
+		private final Queue<T> delegate_;
+		private final int capacity_;
+		
+		public BoundedQueue(int capacity) {
+			capacity_ = capacity;
+			delegate_ = new ArrayDeque<T>(capacity_);
+		}
+
+		@Override
+		protected Queue<T> delegate() {
+			return delegate_;
+		}
+		
+		@Override
+		public boolean add(final T t) {
+			if(size() >= capacity_) {
+				delegate_.poll();
+			}
+			return delegate_.add(t);
+		}
+		
+		@Override
+		public boolean addAll(final Collection<? extends T> collection) {
+			return standardAddAll(collection);
+		}
+		
+		@Override
+		public boolean offer(final T t) {
+			return standardOffer(t);
+		}
+		
 	}
 
 }

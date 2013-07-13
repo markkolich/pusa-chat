@@ -70,6 +70,12 @@ public final class ChatRoom extends PusaChatEntity {
 	 */
 	private final transient Set<UUID> inactive_;
 	
+	/**
+	 * A log of chat messages in this room.  Stored only
+	 * in memory.  Not serialized by GSON.
+	 */
+	private final transient ChatLog log_;
+	
 	public ChatRoom(String name, UUID roomId, String token) {
 		roomId_ = roomId;
 		token_ = token;
@@ -78,6 +84,7 @@ public final class ChatRoom extends PusaChatEntity {
 		sessions_ = new ConcurrentHashMap<UUID, PusaChatSession>();
 		typing_ = new HashSet<UUID>();
 		inactive_ = new HashSet<UUID>();
+		log_ = new ChatLog();
 	}
 	
 	public ChatRoom(String name, String token) {
@@ -221,6 +228,10 @@ public final class ChatRoom extends PusaChatEntity {
 			activeClients.add(it.next());
 		}
 		return activeClients;
+	}
+	
+	public synchronized ChatLog getChatLog() {
+		return log_;
 	}
 		
 	public static final boolean isValidRoomName(final String roomName) {
