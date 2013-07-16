@@ -53,9 +53,9 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 		// Schedule a new cleaner at a "fixed" interval.
 		executor_.scheduleAtFixedRate(
 			new InactiveUserCleanerExecutor(this),
-			0L,
-			60L,
-			SECONDS);
+			0L, // initial delay
+			60L, // repeat every
+			SECONDS); // units
 	}
 	
 	@Override
