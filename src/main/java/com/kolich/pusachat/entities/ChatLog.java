@@ -1,7 +1,9 @@
 package com.kolich.pusachat.entities;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
@@ -13,20 +15,11 @@ import com.kolich.pusachat.entities.events.PusaChatEvent;
 
 public final class ChatLog extends PusaChatEntity {
 	
-	/**
-	 * The default maximum number of message events to store per chat.
-	 */
-	private static final int DEFAULT_MAX_MESSAGE_EVENT_LOG_SIZE = 50;
-
 	@SerializedName("log")
 	private Queue<PusaChatEvent> messages_;
 	
 	public ChatLog(int maxMessages) {
 		messages_ = new BoundedQueue<PusaChatEvent>(maxMessages);
-	}
-	
-	public ChatLog() {
-		this(DEFAULT_MAX_MESSAGE_EVENT_LOG_SIZE);
 	}
 	
 	public synchronized ChatLog addMessage(PusaChatEvent event) {
@@ -40,7 +33,7 @@ public final class ChatLog extends PusaChatEntity {
 	}
 		
 	public synchronized List<Message> getMessages() {
-		return Arrays.asList(messages_.toArray(new Message[]{}));
+		return unmodifiableList(asList(messages_.toArray(new Message[]{})));
 	}
 	
 	@Override
