@@ -1,8 +1,34 @@
+/**
+ * Copyright (c) 2013 Mark S. Kolich
+ * http://mark.koli.ch
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.kolich.pusachat.spring.beans;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +72,10 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 		// Reverse maps.
 		keysToRooms_ = new ConcurrentHashMap<String, UUID>();
 		roomsToKeys_ = new ConcurrentHashMap<UUID, String>();
-		final long removeInactiveUsersAfter =
+		// Extract a configuration property that instructions how often
+		// the chat room cleaner thread should wake up and remove "dead"
+		// users from all of the rooms.
+		final long removeInactiveUsersAfterMs =
 			properties_.getRemoveInactiveAfter();
 		// Setup a new thread factory builder.
 		executor_ = newSingleThreadScheduledExecutor(
@@ -56,10 +85,10 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 				.build());
 		// Schedule a new cleaner at a "fixed" interval.
 		executor_.scheduleAtFixedRate(
-			new InactiveUserCleanerExecutor(this, removeInactiveUsersAfter),
+			new InactiveUserCleanerExecutor(this, removeInactiveUsersAfterMs),
 			0L,  // initial delay
-			removeInactiveUsersAfter, // repeat every
-			SECONDS); // units
+			removeInactiveUsersAfterMs, // repeat every
+			MILLISECONDS); // units
 	}
 	
 	@Override
@@ -93,7 +122,9 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 			// The room's UUID.
 			roomId,
 			// Digitally signed room UUID (a.k.a., room token).
-			signer_.sign(roomId.toString()));
+			signer_.sign(roomId.toString()),
+			// The maximum number of cached messages to keep in memory.
+			properties_.getMaxCachedMessagePerRoom());
 		chatRooms_.put(cr.getId(), cr);
 		keysToRooms_.put(roomName, cr.getId());
 		roomsToKeys_.put(cr.getId(), roomName);

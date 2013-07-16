@@ -42,9 +42,9 @@ public class PusaChatWebConfig extends WebMvcConfigurationSupport {
 		// does not URL-decode the path on an incoming request before it
 		// attempts to map it to the right Controller.  For example, if the
 		// original incoming request is ...
-		//   /havalo/app/api/object/files%2Fimag%252Fes%2Fbogus.jpg
+		//   /app/api/object/files%2Fimag%252Fes%2Fbogus.jpg
 		// ... then Spring, by defualt, will URL-decode this to ...
-		//   /havalo/app/api/object/files/imag%2Fes/bogus.jpg
+		//   /app/app/api/object/files/imag%2Fes/bogus.jpg
 		// ... which is WRONG (it won't map to a real Controller because of
 		// the URL-decoded slashes).
 		hm.setUrlDecode(false);

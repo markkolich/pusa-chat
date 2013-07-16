@@ -35,7 +35,7 @@
             	<entry key="pusachat.app.mode" value="${pusachat.app.mode}" />
             	<entry key="pusachat.context.path" value="${pusachat.context.path}" />
             	<entry key="pusachat.remove-inactive-users-after.ms" value="${pusachat.remove-inactive-users-after.ms}" />
-            	<!-- <entry key="pusachat.max-chat-log-size" value="${pusachat.max-chat-log-size}" /> -->
+            	<entry key="pusachat.max-cached-messages-per-room" value="${pusachat.max-cached-messages-per-room}" />
             </util:map>
 	    </property>
 	</bean>

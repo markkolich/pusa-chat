@@ -1,3 +1,29 @@
+/**
+ * Copyright (c) 2013 Mark S. Kolich
+ * http://mark.koli.ch
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.kolich.pusachat.entities;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
@@ -76,7 +102,7 @@ public final class ChatRoom extends PusaChatEntity {
 	 */
 	private final transient ChatLog log_;
 	
-	public ChatRoom(String name, UUID roomId, String token) {
+	public ChatRoom(String name, UUID roomId, String token, int maxMessages) {
 		roomId_ = roomId;
 		token_ = token;
 		createdOn_ = new Date();
@@ -84,16 +110,12 @@ public final class ChatRoom extends PusaChatEntity {
 		sessions_ = new ConcurrentHashMap<UUID, PusaChatSession>();
 		typing_ = new HashSet<UUID>();
 		inactive_ = new HashSet<UUID>();
-		log_ = new ChatLog(50);
-	}
-	
-	public ChatRoom(String name, String token) {
-		this(name, UUID.randomUUID(), token);
+		log_ = new ChatLog(maxMessages);
 	}
 	
 	// For GSON
 	protected ChatRoom() {
-		this(null, null);
+		this(null, null, null, -1);
 	}
 
 	public UUID getId() {
