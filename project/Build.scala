@@ -88,10 +88,21 @@ object PackageJS {
   val settings = Seq(
     packageJS <<= baseDirectory(new File(_, "src/main/webapp/WEB-INF/static")) map { base =>
       val js = base / "js"
-      val release = base / "release"
-      val sources = getFileList(js, Seq("jquery-1.8.3.min.js", "some-javascript-file.js"))
-      //val externs = getFileList(js / "externs", Seq("jquery-1.8.js"))
-      val compile = getCompileTask(release / "output.js", sources)
+      val release = base / "release"      
+      val sources = getFileList(js, Seq(
+          "pusachat.js",
+          "pusachat.homepage.js",
+          "pusachat.chat.js"
+    	))
+      val externs = getFileList(js / "externs", Seq(
+          "jquery-1.7.js",
+          "jquery.chrono-1.1.js",
+          "jquery.localtime-0.5.js",
+          "jquery.simplemodal-1.4.1.js",
+          "jquery.titlealert-0.7.js",
+          "jquery.typing-0.2.0.min.js"
+    	))
+      val compile = getCompileTask(release / "pusachat.js", sources, Some(externs))
       compile.execute
     },
     compile in Compile <<= (compile in Compile) dependsOn (packageJS),
@@ -99,7 +110,7 @@ object PackageJS {
 
   private def getCompileTask(output: File, sources: FileList, externs: Option[FileList] = None): CompileTask = {
     val compile = new CompileTask()
-    compile.setCompilationLevel("whitespace") // Could be "simple" or "advanced"
+    compile.setCompilationLevel("advanced") // Could be "simple" or "advanced"
     compile.setWarning("quiet") // Could be "verbose"
     compile.setDebug(false)
     compile.setOutput(output)
@@ -229,7 +240,7 @@ object PusaChat extends Build {
       // Xsbt-web-plugin settings.
       XSBTWebPluginConfig.settings ++
       // Include the relevant settings for JS and CSS "compilation".
-      //PackageJS.settings ++ PackageCSS.settings ++
+      PackageJS.settings ++ /*PackageCSS.settings ++*/
       // Eclipse project plugin settings.
       SBTEclipsePluginConfig.settings)
 
