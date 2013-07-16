@@ -84,7 +84,7 @@ public final class ChatRoom extends PusaChatEntity {
 		sessions_ = new ConcurrentHashMap<UUID, PusaChatSession>();
 		typing_ = new HashSet<UUID>();
 		inactive_ = new HashSet<UUID>();
-		log_ = new ChatLog();
+		log_ = new ChatLog(50);
 	}
 	
 	public ChatRoom(String name, String token) {

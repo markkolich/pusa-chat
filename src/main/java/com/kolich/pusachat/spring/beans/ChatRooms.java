@@ -23,6 +23,7 @@ import com.kolich.common.util.secure.KolichStringSigner;
 import com.kolich.pusachat.entities.ChatRoom;
 import com.kolich.pusachat.entities.events.PusaChatEvent;
 import com.kolich.pusachat.exceptions.RoomNotFoundException;
+import com.kolich.pusachat.spring.PusaChatProperties;
 
 public final class ChatRooms implements InitializingBean, DisposableBean {
 	
@@ -34,6 +35,7 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 	private Map<String, UUID> keysToRooms_;
 	private Map<UUID, String> roomsToKeys_;
 	
+	private PusaChatProperties properties_;
 	private KolichStringSigner signer_;
 	
 	private ScheduledExecutorService executor_;
@@ -44,6 +46,8 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 		// Reverse maps.
 		keysToRooms_ = new ConcurrentHashMap<String, UUID>();
 		roomsToKeys_ = new ConcurrentHashMap<UUID, String>();
+		final long removeInactiveUsersAfter =
+			properties_.getRemoveInactiveAfter();
 		// Setup a new thread factory builder.
 		executor_ = newSingleThreadScheduledExecutor(
 			new ThreadFactoryBuilder()
@@ -52,9 +56,9 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 				.build());
 		// Schedule a new cleaner at a "fixed" interval.
 		executor_.scheduleAtFixedRate(
-			new InactiveUserCleanerExecutor(this),
-			0L, // initial delay
-			60L, // repeat every
+			new InactiveUserCleanerExecutor(this, removeInactiveUsersAfter),
+			0L,  // initial delay
+			removeInactiveUsersAfter, // repeat every
 			SECONDS); // units
 	}
 	
@@ -126,13 +130,15 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 		}
 	}
 	
+	public void setProperties(PusaChatProperties properties) {
+		properties_ = properties;
+	}
+	
 	public void setSigner(KolichStringSigner signer) {
 		signer_ = signer;
 	}
 	
 	private final class InactiveUserCleanerExecutor implements Runnable {
-		
-		private static final long DEFAULT_ONE_MINUTE_IN_MS = 60000L;
 		
 		/**
 		 * How "old" inactive users can be before they are considered
@@ -146,10 +152,6 @@ public final class ChatRooms implements InitializingBean, DisposableBean {
 			final long expiry) {
 			rooms_ = rooms;
 			expiry_ = expiry;
-		}
-		
-		private InactiveUserCleanerExecutor(final ChatRooms rooms) {
-			this(rooms, DEFAULT_ONE_MINUTE_IN_MS);
 		}
 
 		@Override
