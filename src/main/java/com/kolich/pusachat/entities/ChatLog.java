@@ -61,7 +61,8 @@ public final class ChatLog extends PusaChatEntity {
 	}
 	
 	public synchronized ChatLog deleteMessage(Delete deleted) {
-		((BoundedQueue<PusaChatEvent>)messages_).removeEventById(deleted.getMessageId());
+		((BoundedQueue<PusaChatEvent>)messages_).removeEventById(
+			deleted.getMessageId());
 		return this;
 	}
 	
