@@ -38,7 +38,7 @@ object Dependencies {
 
   // Internal dependencies
 
-  private val kolichSpring = "com.kolich" % "kolich-spring" % "0.0.7" % "compile" exclude("com.kolich", "kolich-common")
+  private val kolichSpring = "com.kolich" % "kolich-spring" % "0.0.7" % "compile" exclude ("com.kolich", "kolich-common")
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
 
   // External dependencies
@@ -84,45 +84,51 @@ object PackageJS {
   import org.apache.tools.ant.types._
   import org.apache.tools.ant.taskdefs._
   import com.google.javascript.jscomp.ant._
-  
+
   lazy val packageJS = TaskKey[Unit]("package-js", "Run all JavaScript through Google's Closure compiler.")
   val settings = Seq(
     packageJS <<= baseDirectory(new File(_, "src/main/webapp/WEB-INF/static")) map { base =>
       val js = base / "js"
-      val release = base / "release"      
+      val build = js / "build"
+      val release = base / "release"
       val sources = getFileList(js, Seq(
-          "pusachat.js",
-          "pusachat.homepage.js",
-          "pusachat.chat.js"
-    	))
+        "pusachat.js",
+        "pusachat.homepage.js",
+        "pusachat.chat.js"))
       val externs = getFileList(js / "externs", Seq(
-          "jquery-1.7.js",
-          "jquery.chrono-1.1.js",
-          "jquery.localtime-0.5.js",
-          "jquery.simplemodal-1.4.1.js",
-          "jquery.titlealert-0.7.js",
-          "jquery.typing-0.2.0.min.js"
-    	))
+        "jquery-1.7.js",
+        "jquery.chrono-1.1.js",
+        "jquery.localtime-0.5.js",
+        "jquery.simplemodal-1.4.1.js",
+        "jquery.titlealert-0.7.js",
+        "jquery.typing-0.2.0.min.js"))
       val libs = getFileList(js / "lib", Seq(
-          "json2.js",
-          "jquery-1.7.1.min.js",
-          "jquery.chrono-1.1.js",
-          "jquery.localtime-0.5.js",
-          "jquery.simplemodal-1.4.1.js",
-          "jquery.titlealert-0.7.js",
-          "jquery.typing-0.2.0.min.js"
-        ))
-      getConcatTask(release / "pusachat.lib.build.js", libs).execute
-      getCompileTask(release / "pusachat.lib.js", getFileList(release, "pusachat.lib.build.js")).execute
+        "json2.js",
+        "jquery-1.7.1.min.js",
+        "jquery.chrono-1.1.js",
+        "jquery.localtime-0.5.js",
+        "jquery.simplemodal-1.4.1.js",
+        "jquery.titlealert-0.7.js",
+        "jquery.typing-0.2.0.min.js"))
       
-      getConcatTask(release / "pusachat.core.build.js", sources).execute
-      getCompileTask(release / "pusachat.core.js", getFileList(release, "pusachat.core.build.js"), Some(externs), "advanced").execute
-      
-      getConcatTask(release / "pusachat.js", getFileList(release, Seq("pusachat.lib.js", "pusachat.core.js"))).execute
+      // Package all of the library related JavaScript files together.
+      // Compile using the "simple" compilation level. 
+      getConcatTask(build / "pusachat.lib.js", libs).execute
+      getCompileTask(build / "pusachat.lib.js",
+        getFileList(build, "pusachat.lib.js")).execute
+
+      // Package the core app JavaScript files together.
+      // Compile using the "advanced" compilation level.
+      getConcatTask(build / "pusachat.js", sources).execute
+      getCompileTask(build / "pusachat.js",
+        getFileList(build, "pusachat.js"),
+        Some(externs), "advanced").execute
+
+      getConcatTask(release / "pusachat.js",
+        getFileList(build, Seq("pusachat.lib.js", "pusachat.js"))).execute
     },
     compile in Compile <<= (compile in Compile) dependsOn (packageJS),
-    packageWar in Compile <<= (packageWar in Compile) dependsOn (packageJS)
-  )
+    packageWar in Compile <<= (packageWar in Compile) dependsOn (packageJS))
 
   private def getCompileTask(output: File, sources: FileList,
     externs: Option[FileList] = None, compilationLevel: String = "simple"): CompileTask = {
@@ -132,14 +138,12 @@ object PackageJS {
     compile.setDebug(false)
     compile.setOutput(output)
     compile.addSources(sources)
-    if(externs != None) {
+    compile.setForceRecompile(false) // False is the default, but here for doc purposes
+    if (externs != None) {
       compile.addExterns(externs.get)
     }
     compile
   }
-
-  // Builds a vanilla Ant FileList that contains a list of files
-  // in a single directory.
   private def getFileList(dir: File, files: Seq[String]): FileList = {
     val list = new FileList()
     list.setDir(dir)
@@ -149,14 +153,12 @@ object PackageJS {
   private def getFileList(dir: File, file: String): FileList = {
     getFileList(dir, Seq(file))
   }
-  
   private def getConcatTask(dest: File, fileList: FileList): Concat = {
     val concat = new Concat()
     concat.setDestfile(dest)
     concat.addFilelist(fileList)
     concat
   }
-
 }
 
 object PackageCSS {
@@ -185,7 +187,7 @@ object XSBTWebPluginConfig {
 }
 
 object SBTEclipsePluginConfig {
-  
+
   import com.typesafe.sbteclipse.plugin.EclipsePlugin._
 
   val settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
@@ -266,6 +268,17 @@ object PusaChat extends Build {
       }) ++
       // Xsbt-web-plugin settings.
       XSBTWebPluginConfig.settings ++
+      Seq(warPostProcess in Compile <<= (target) map {
+        // Specific directories that contain intermediate build files
+        // and artifacts should not make their way into the packaged WAR
+        // file.  As such, this removes temporary directories used just for
+        // the build.
+        (target) => { () => {
+	      val webinf = target / "webapp" / "WEB-INF"
+	      IO.delete(webinf / "work") // recursive
+	      IO.delete(webinf / "static" / "js" / "build") // recursive
+        }}
+      }) ++
       // Include the relevant settings for JS and CSS "compilation".
       PackageJS.settings ++ /*PackageCSS.settings ++*/
       // Eclipse project plugin settings.

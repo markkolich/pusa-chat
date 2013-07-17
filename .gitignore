@@ -11,3 +11,4 @@ config
 
 src/main/webapp/WEB-INF/work
 src/main/webapp/WEB-INF/static/release
+src/main/webapp/WEB-INF/static/js/build
