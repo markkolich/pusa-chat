@@ -82,6 +82,7 @@ object Resolvers {
 object PackageJS {
 
   import org.apache.tools.ant.types._
+  import org.apache.tools.ant.taskdefs._
   import com.google.javascript.jscomp.ant._
   
   lazy val packageJS = TaskKey[Unit]("package-js", "Run all JavaScript through Google's Closure compiler.")
@@ -102,15 +103,31 @@ object PackageJS {
           "jquery.titlealert-0.7.js",
           "jquery.typing-0.2.0.min.js"
     	))
-      val compile = getCompileTask(release / "pusachat.js", sources, Some(externs))
-      compile.execute
+      val libs = getFileList(js / "lib", Seq(
+          "json2.js",
+          "jquery-1.7.1.min.js",
+          "jquery.chrono-1.1.js",
+          "jquery.localtime-0.5.js",
+          "jquery.simplemodal-1.4.1.js",
+          "jquery.titlealert-0.7.js",
+          "jquery.typing-0.2.0.min.js"
+        ))
+      getConcatTask(release / "pusachat.lib.build.js", libs).execute
+      getCompileTask(release / "pusachat.lib.js", getFileList(release, "pusachat.lib.build.js")).execute
+      
+      getConcatTask(release / "pusachat.core.build.js", sources).execute
+      getCompileTask(release / "pusachat.core.js", getFileList(release, "pusachat.core.build.js"), Some(externs), "advanced").execute
+      
+      getConcatTask(release / "pusachat.js", getFileList(release, Seq("pusachat.lib.js", "pusachat.core.js"))).execute
     },
     compile in Compile <<= (compile in Compile) dependsOn (packageJS),
-    packageWar in Compile <<= (packageWar in Compile) dependsOn (packageJS))
+    packageWar in Compile <<= (packageWar in Compile) dependsOn (packageJS)
+  )
 
-  private def getCompileTask(output: File, sources: FileList, externs: Option[FileList] = None): CompileTask = {
+  private def getCompileTask(output: File, sources: FileList,
+    externs: Option[FileList] = None, compilationLevel: String = "simple"): CompileTask = {
     val compile = new CompileTask()
-    compile.setCompilationLevel("advanced") // Could be "simple" or "advanced"
+    compile.setCompilationLevel(compilationLevel) // Could be "simple" or "advanced"
     compile.setWarning("quiet") // Could be "verbose"
     compile.setDebug(false)
     compile.setOutput(output)
@@ -128,6 +145,16 @@ object PackageJS {
     list.setDir(dir)
     list.setFiles(files.mkString(", "))
     list
+  }
+  private def getFileList(dir: File, file: String): FileList = {
+    getFileList(dir, Seq(file))
+  }
+  
+  private def getConcatTask(dest: File, fileList: FileList): Concat = {
+    val concat = new Concat()
+    concat.setDestfile(dest)
+    concat.addFilelist(fileList)
+    concat
   }
 
 }
