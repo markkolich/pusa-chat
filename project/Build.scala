@@ -114,27 +114,26 @@ object PackageJS {
         "jquery.titlealert-0.7.js",
         "jquery.typing-0.2.0.min.js"))
       
-      // Package all of the library related JavaScript files together.
+      // Concatenate the library related JavaScript files together.
       // Compile using the "simple" compilation level. 
-      getConcatTask(build / "pusachat.lib.js", libs)
-      getCompileTask(build / "pusachat.lib.js",
-        getFileList(build, "pusachat.lib.js"))
+      concat(build / "pusachat.lib.js", libs)
+      compile(build / "pusachat.lib.js", getFileList(build, "pusachat.lib.js"))
 
       // Package the core app JavaScript files together.
       // Compile using the "advanced" compilation level.
-      getConcatTask(build / "pusachat.js", sources)
-      getCompileTask(build / "pusachat.js",
-        getFileList(build, "pusachat.js"),
+      concat(build / "pusachat.js", sources)
+      compile(build / "pusachat.js", getFileList(build, "pusachat.js"),
         Some(externs), "advanced")
 
-      getConcatTask(release / "pusachat.js",
+      // 
+      concat(release / "pusachat.js",
         getFileList(build, Seq("pusachat.lib.js", "pusachat.js")))
     },
     compile in Compile <<= (compile in Compile) dependsOn (packageJS),
     packageWar in Compile <<= (packageWar in Compile) dependsOn (packageJS)
   )
 
-  private def getCompileTask(output: File, sources: FileList,
+  private def compile(output: File, sources: FileList,
     externs: Option[FileList] = None, compilationLevel: String = "simple") {
     val compile = new CompileTask()
     compile.setCompilationLevel(compilationLevel) // Could be "simple" or "advanced"
@@ -157,7 +156,7 @@ object PackageJS {
   private def getFileList(dir: File, file: String): FileList = {
     getFileList(dir, Seq(file))
   }
-  private def getConcatTask(dest: File, fileList: FileList) {
+  private def concat(dest: File, fileList: FileList) {
     val concat = new Concat()
     concat.setDestfile(dest)
     concat.addFilelist(fileList)
