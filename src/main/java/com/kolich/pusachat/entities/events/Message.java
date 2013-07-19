@@ -44,7 +44,8 @@ public final class Message extends PusaChatEvent {
 		html_ = html;
 	}
 	
-	protected Message() {
+	// For GSON
+	public Message() {
 		this(null, null);
 	}
 

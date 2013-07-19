@@ -20,7 +20,7 @@
     	ignore-unresolvable="true" ignore-resource-not-found="true" order="2" />
     	
     <!-- Application properties, used during development. -->
-	<context:property-placeholder location="classpath:override.pusachat.properties"
+	<context:property-placeholder location="classpath:pusachat.properties"
 		ignore-unresolvable="true" ignore-resource-not-found="true" order="3" />
     	
     <!-- The default application properties (packaged with .war) -->

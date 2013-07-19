@@ -85,25 +85,25 @@ public abstract class PusaChatEvent extends PusaChatEntity
 		type_ = type;
 	}
 	
-	public UUID getId() {
+	public final UUID getId() {
 		return id_;
 	}
 	
-	public Date getWhen() {
+	public final Date getWhen() {
 		return when_;
 	}
 	
-	public PusaChatEventType getType() {
+	public final PusaChatEventType getType() {
 		return type_;
 	}
 	
 	@Override
-	public int compareTo(PusaChatEvent m) {
+	public final int compareTo(PusaChatEvent m) {
 		return m.getWhen().compareTo(getWhen());
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id_ == null) ? 0 : id_.hashCode());
@@ -111,7 +111,7 @@ public abstract class PusaChatEvent extends PusaChatEntity
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

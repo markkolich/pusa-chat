@@ -8,7 +8,7 @@
 	
 	<c:choose>
 		<c:when test='${PusaChatProperties.isProductionMode()}'>
-			<link rel="stylesheet" href="${PusaChatProperties.getContextPath()}css/pusachat.css??v=${PusaChatProperties.getAppVersion()}" type="text/css" />
+			<link rel="stylesheet" href="${PusaChatProperties.getContextPath()}css/pusachat.css?v=${PusaChatProperties.getAppVersion()}" type="text/css" />
 		</c:when>
 		<c:otherwise>
 			<!-- DEV MODE -->
