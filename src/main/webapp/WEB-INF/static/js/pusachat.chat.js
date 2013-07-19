@@ -176,21 +176,7 @@
 		},
 		
 		bosh = {
-			// Global BOSH status.  Is set to true when registration with
-			// the server is successful, and is later set to false in the event
-			// that something goes wrong and no further BOSH events should be
-			// sent.
-			alive: false,
-			ifAlive: function($ajaxReq) {
-				// Only call the proviced callback if our BOSH status is
-				// "alive" -- the server is confirmed there and we can send
-				// event requests.
-				($ajaxReq && bosh.alive) && $.ajax($ajaxReq);
-			},
 			register: function() {
-				// ALERT: Not using bosh.ifAlive() here cuz we need to register
-				// with the chat server and "bosh.alive" will always be false at
-				// "start of day".
 				$.ajax({
 	    			url: api + 'chat/register/' + room.id + '.json',
 	    			dataType: 'json',
@@ -203,9 +189,6 @@
 	    				room.token = data['token'];
 	    				// We're assigned a client ID by the server.
 	    				room.clientId = data['client_id'];
-	    				// We're alive, looks like registration succeeded so
-	    				// set our global status to true (ready for events).
-	    				bosh.alive = true;
 	    				// Load the chat log.
 	    				bosh.fetchLog();
 	    				// Initiate the session.
@@ -219,7 +202,7 @@
 	    		});
 			},
 			typing: function(typing) {
-				bosh.ifAlive({
+				$.ajax({
 	    			url: api + 'chat/typing/' + room.token + '.json',
 	    			data: {'typing': typing},
 	    			dataType: 'json',
@@ -227,7 +210,7 @@
 	    		});
 			},
 			inactivity: function(active) {
-				bosh.ifAlive({
+				$.ajax({
 	    			url: api + 'chat/inactivity/' + room.token + '.json',
 	    			data: {'active': active},
 	    			dataType: 'json',
@@ -235,7 +218,7 @@
 	    		});
 			},			
 			sendMessage: function(message) {
-				bosh.ifAlive({
+				$.ajax({
 	    			url: api + 'chat/message/' + room.token + '.json',
 	    			data: {'message': message},
 	    			dataType: 'json',
@@ -268,7 +251,7 @@
 			},
 			deleteMessage: function(li) {
 				var id = li.attr("id");
-				bosh.ifAlive({
+				$.ajax({
 	    			url: api + 'chat/message/' + room.token + '.json',
 	    			data: {'messageId': id},
 	    			dataType: 'json',
@@ -286,7 +269,7 @@
 	    		});
 			},
 			fetchLog: function() {
-				bosh.ifAlive({
+				$.ajax({
 	    			url: api + 'chat/log/' + room.token + '.json',
 	    			dataType: 'json',
 	    			type: 'GET',
@@ -304,7 +287,7 @@
 			},
 			event: function() {
 				var refetch = timeouts.NONE;
-				bosh.ifAlive({
+				$.ajax({
 	    			url: api + 'chat/event/' + room.token + '.json',
 	    			dataType: 'json',
 	    			success: function(event) {
@@ -394,7 +377,9 @@
 	    				} else {
 	    					// Hm, looks like an error occurred and we will not
 	    					// kick off another BOSH transaction.  Bail, die.
-	    					bosh.alive = false;
+	    					chat.showError("Error occurred while communicating with server " +
+								"(msg=" + ts + ", e=" + errorThrown + ", status=" +
+									status + ")");
 	    				}
 	    			}
 		    	});
