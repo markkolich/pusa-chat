@@ -38,7 +38,7 @@ object Dependencies {
 
   // Internal dependencies
 
-  private val kolichSpring = "com.kolich" % "kolich-spring" % "0.0.7" % "compile" exclude ("com.kolich", "kolich-common")
+  private val kolichSpring = "com.kolich" % "kolich-spring" % "0.0.7" % "compile" exclude("com.kolich", "kolich-common")
   private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
 
   // External dependencies
@@ -117,15 +117,16 @@ object PackageJS {
       // Concatenate the library related JavaScript files together.
       // Compile using the "simple" compilation level. 
       concat(build / "pusachat.lib.js", libs)
-      compile(build / "pusachat.lib.js", getFileList(build, "pusachat.lib.js"))
+      closureCompile(build / "pusachat.lib.js", getFileList(build, "pusachat.lib.js"))
 
       // Package the core app JavaScript files together.
       // Compile using the "advanced" compilation level.
       concat(build / "pusachat.js", sources)
-      compile(build / "pusachat.js", getFileList(build, "pusachat.js"),
+      closureCompile(build / "pusachat.js", getFileList(build, "pusachat.js"),
         Some(externs), "advanced")
 
-      // 
+      // Package the final product, the libraries and the application
+      // JavaScript core, into a single deliverable.
       concat(release / "pusachat.js",
         getFileList(build, Seq("pusachat.lib.js", "pusachat.js")))
     },
@@ -133,7 +134,7 @@ object PackageJS {
     packageWar in Compile <<= (packageWar in Compile) dependsOn (packageJS)
   )
 
-  private def compile(output: File, sources: FileList,
+  private def closureCompile(output: File, sources: FileList,
     externs: Option[FileList] = None, compilationLevel: String = "simple") {
     val compile = new CompileTask()
     compile.setCompilationLevel(compilationLevel) // Could be "simple" or "advanced"
