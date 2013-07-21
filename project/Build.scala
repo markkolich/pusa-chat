@@ -79,19 +79,20 @@ object Resolvers {
 
 }
 
-object PackageJS {
+object PackageJs {
 
   import org.apache.tools.ant.types._
   import org.apache.tools.ant.taskdefs._
+  
   import com.google.javascript.jscomp.ant._
 
-  private lazy val packageJS = TaskKey[Unit](
+  private lazy val packageJs = TaskKey[Unit](
       "package:js",
       "Compile and package application JavaScript with Google's Closure Compiler."
   )
   
   val settings = Seq(
-    packageJS <<= baseDirectory(new File(_, "src/main/webapp/WEB-INF/static")) map { base =>
+    packageJs <<= baseDirectory(new File(_, "src/main/webapp/WEB-INF/static")) map { base =>
       val js = base / "js"
       val build = js / "build"
       val release = base / "release"
@@ -117,6 +118,8 @@ object PackageJS {
         "jquery.simplemodal-1.4.1.js",
         "jquery.titlealert-0.7.js",
         "jquery.typing-0.2.0.min.js"))
+        
+      println("Compiling JavaScript...")
       
       // Concatenate the library related JavaScript files together.
       // Compile using the "simple" compilation level. 
@@ -134,8 +137,8 @@ object PackageJS {
       concatenate(release / "pusachat.js",
         getFileList(build, Seq("pusachat.lib.js", "pusachat.js")))
     },
-    compile in Compile <<= (compile in Compile) dependsOn (packageJS),
-    packageWar in Compile <<= (packageWar in Compile) dependsOn (packageJS)
+    compile in Compile <<= (compile in Compile) dependsOn (packageJs),
+    packageWar in Compile <<= (packageWar in Compile) dependsOn (packageJs)
   )
 
   private def closureCompile(output: File, sources: FileList,
@@ -169,21 +172,36 @@ object PackageJS {
   }
 }
 
-object PackageCSS {
+object PackageCss {
+  
+  import java.io._
+  
+  import com.yahoo.platform.yui.compressor._
 
-  private lazy val packageCSS = TaskKey[Unit](
+  private lazy val packageCss = TaskKey[Unit](
       "package:css",
       "Minify CSS using YUI's CSS compressor."
   )
   
   val settings = Seq(
-    packageCSS <<= baseDirectory(new File(_, "src/main/webapp/WEB-INF/static")) map { base =>
+    packageCss <<= baseDirectory(new File(_, "src/main/webapp/WEB-INF/static")) map { base =>
       val css = base / "css"
       val release = base / "release"
-      
+      println("Compiling CSS...")
+      // Setup the input reader and the output writer.
+      var reader:Reader = null
+      var writer:Writer = null
+      try {
+        reader = new InputStreamReader(new FileInputStream(css / "pusachat.css"), "UTF-8");
+        writer = new OutputStreamWriter(new FileOutputStream(release / "pusachat.css"), "UTF-8")
+        new CssCompressor(reader).compress(writer, -1)
+      } finally {
+        if(reader != null) { reader.close }
+        if(writer != null) { writer.close }
+      }
     },
-    compile in Compile <<= (compile in Compile) dependsOn (packageCSS),
-    packageWar in Compile <<= (packageWar in Compile) dependsOn (packageCSS)
+    compile in Compile <<= (compile in Compile) dependsOn (packageCss),
+    packageWar in Compile <<= (packageWar in Compile) dependsOn (packageCss)
   )
 
 }
@@ -204,7 +222,7 @@ object XSBTWebPluginConfig {
 	    (target) => { () => {
 	      val webinf = target / "webapp" / "WEB-INF"
 	      IO.delete(webinf / "work") // recursive
-	      //IO.delete(webinf / "static" / "js" / "build") // recursive
+	      IO.delete(webinf / "static" / "js" / "build") // recursive
 	    }}
     })
 
@@ -293,7 +311,7 @@ object PusaChat extends Build {
       // Xsbt-web-plugin settings.
       XSBTWebPluginConfig.settings ++
       // Include the relevant settings for JS and CSS "compilation".
-      PackageJS.settings ++ PackageCSS.settings ++
+      PackageJs.settings ++ PackageCss.settings ++
       // Eclipse project plugin settings.
       SBTEclipsePluginConfig.settings)
 
