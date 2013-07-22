@@ -187,6 +187,10 @@ object PackageCss {
     packageCss <<= baseDirectory(new File(_, "src/main/webapp/WEB-INF/static")) map { base =>
       val css = base / "css"
       val release = base / "release"
+      // Create the "release" directory if it does not exist (YUI does not
+      // create this destination directory for us... it has to exist before
+      // we attempt to use it).
+      IO.createDirectory(release)
       println("Compiling CSS...")
       // Setup the input reader and the output writer.
       var reader:Reader = null
