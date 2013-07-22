@@ -226,7 +226,8 @@ object XSBTWebPluginConfig {
 	    (target) => { () => {
 	      val webinf = target / "webapp" / "WEB-INF"
 	      IO.delete(webinf / "work") // recursive
-	      IO.delete(webinf / "static" / "js" / "build") // recursive
+	      IO.delete(webinf / "classes") // recursive
+	      IO.delete(webinf / "static" / "js" / "build") // recursive	      
 	    }}
     })
 
