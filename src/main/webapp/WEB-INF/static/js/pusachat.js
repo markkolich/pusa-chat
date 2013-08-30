@@ -12,13 +12,13 @@ var PusaChat = (function($, parent, document, undefined) {
 		protocol = location.protocol,
 		
 		// Production domains, and port (if any)
-		domains = ['onyx.koli.ch', 'pusa'],
+		domains = ['onyx.koli.ch'],
 		
 		// If the detected hostname is not a production domain, then we
 		// must be in development.  In which case, the path below
 		// will not be '/' but rather something behind Tomcat.
 		debug = !!($.inArray(hostname, domains) == -1),
-		path = (debug ? '/' : '/pusa-chat/'),
+		path = (debug ? '/' : '/pusa/'),
 		api = path + 'api/',
 		
 		// Dynamically build the base app URL.
