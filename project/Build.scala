@@ -30,23 +30,20 @@ import sbt.Keys._
 import com.earldouglas.xsbtwebplugin._
 import PluginKeys._
 import WebPlugin._
-import WebappPlugin._
-
-import com.typesafe.sbteclipse.plugin.EclipsePlugin._
 
 object Dependencies {
 
   // Internal dependencies
 
-  private val kolichSpring = "com.kolich" % "kolich-spring" % "0.0.7" % "compile" exclude("com.kolich", "kolich-common")
-  private val kolichCommon = "com.kolich" % "kolich-common" % "0.1.0" % "compile"
+  private val kolichSpring = "com.kolich" % "kolich-spring" % "0.0.8" % "compile" exclude("com.kolich", "kolich-common")
+  private val kolichCommon = "com.kolich" % "kolich-common" % "0.2" % "compile"
 
   // External dependencies
 
-  // Using Jetty 8 "stable", version 8.1.8.v20121106
-  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106" % "container"
-  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "8.1.8.v20121106" % "container"
-  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "8.1.8.v20121106" % "container"
+  // Jetty 9 stable, version 9.1.1.v20140108 (as of 2/7/14)
+  private val jettyWebApp = "org.eclipse.jetty" % "jetty-webapp" % "9.1.1.v20140108" % "container"
+  private val jettyPlus = "org.eclipse.jetty" % "jetty-plus" % "9.1.1.v20140108" % "container"
+  private val jettyJsp = "org.eclipse.jetty" % "jetty-jsp" % "9.1.1.v20140108" % "container"
 
   private val jspApi = "javax.servlet.jsp" % "jsp-api" % "2.2" % "provided" // Provided by servlet container
   private val jstl = "jstl" % "jstl" % "1.2" % "compile" // Package with WAR
@@ -233,19 +230,6 @@ object XSBTWebPluginConfig {
 
 }
 
-object SBTEclipsePluginConfig {
-
-  import com.typesafe.sbteclipse.plugin.EclipsePlugin._
-
-  val settings = Seq(EclipseKeys.createSrc := EclipseCreateSrc.Default,
-    // Make sure SBT also fetches/loads the "src" (source) JAR's for
-    // all declared dependencies.
-    EclipseKeys.withSource := true,
-    // This is a Java project, only.
-    EclipseKeys.projectFlavor := EclipseProjectFlavor.Java)
-
-}
-
 object PusaChat extends Build {
 
   import Dependencies._
@@ -316,8 +300,6 @@ object PusaChat extends Build {
       // Xsbt-web-plugin settings.
       XSBTWebPluginConfig.settings ++
       // Include the relevant settings for JS and CSS "compilation".
-      PackageJs.settings ++ PackageCss.settings ++
-      // Eclipse project plugin settings.
-      SBTEclipsePluginConfig.settings)
+      PackageJs.settings ++ PackageCss.settings)
 
 }
