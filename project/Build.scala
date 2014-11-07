@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Mark S. Kolich
+ * Copyright (c) 2014 Mark S. Kolich
  * http://mark.koli.ch
  *
  * Permission is hereby granted, free of charge, to any person
@@ -242,7 +242,7 @@ object PusaChat extends Build {
   lazy val pusaChat: Project = Project(
     aName,
     new File("."),
-    settings = Defaults.defaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
+    settings = Defaults.coreDefaultSettings ++ Seq(resolvers := depResolvers) ++ Seq(
       version := aVer,
       organization := aOrg,
       scalaVersion := "2.10.1",
