@@ -1,0 +1,28 @@
+{
+  "name": "pusa-chat",
+  "description": "A lightweight, all in memory, multi-user web based chat application.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markkolich/pusa-chat.git"
+  },
+  "author": "Mark S. Kolich",
+  "license": "MIT",
+  "dependencies": {
+    "gulp-cli": "^3.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "eslint": "^10.0.0",
+    "globals": "^17.0.0",
+    "gulp": "^5.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-eslint-new": "^2.6.0",
+    "gulp-header": "^2.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-terser": "^2.1.0"
+  },
+  "allowScripts": {
+    "fsevents": false
+  }
+}
