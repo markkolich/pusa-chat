@@ -1,17 +1,22 @@
 *.class
 
+# Package Files #
+*.war
+*.ear
+*.jar
+
 .project
 .classpath
-.idea
-.idea_modules
 .cache
-project/target
-lib_managed
-dist
+.idea
 target
 bin
-config
-
-src/main/webapp/WEB-INF/work
-src/main/webapp/WEB-INF/static
-
+dist
+*.iml
+*.ipr
+*.iws
+.DS_Store
+src/main/webapp/static/node
+src/main/webapp/static/node_modules
+src/main/webapp/static/build
+src/main/webapp/static/release

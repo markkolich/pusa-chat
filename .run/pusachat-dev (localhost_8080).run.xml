@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="pusachat-dev (localhost:8080)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="pusachat.Application" />
+    <module name="pusa-chat" />
+    <option name="VM_PARAMETERS" value="-Dconfig.file=$USER_HOME$/pusachat-dev.conf" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="pusachat.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
