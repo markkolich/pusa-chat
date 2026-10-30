@@ -27,12 +27,12 @@
 package pusachat.controllers;
 
 import curacao.annotations.Controller;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Query;
 import curacao.freemarker.entities.FreeMarkerContent;
 import pusachat.components.freemarker.PusaChatFreeMarkerContent;
 
-import static curacao.annotations.RequestMapping.Method.GET;
+import static curacao.annotations.Route.Method.GET;
 
 /**
  * The homepage: join a room, or create one.
@@ -40,7 +40,7 @@ import static curacao.annotations.RequestMapping.Method.GET;
 @Controller
 public final class Index {
 
-    @RequestMapping(value = "^/$",
+    @Route(value = "^/$",
             methods = GET)
     public FreeMarkerContent index(
             @Query("key") final String key) {

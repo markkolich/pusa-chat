@@ -28,7 +28,7 @@ package pusachat.controllers;
 
 import curacao.annotations.Controller;
 import curacao.annotations.Injectable;
-import curacao.annotations.RequestMapping;
+import curacao.annotations.Route;
 import curacao.annotations.parameters.Path;
 import curacao.annotations.parameters.RequestBody;
 import curacao.freemarker.entities.FreeMarkerContent;
@@ -39,8 +39,8 @@ import pusachat.entities.ChatRoom;
 
 import java.util.Locale;
 
-import static curacao.annotations.RequestMapping.Method.GET;
-import static curacao.annotations.RequestMapping.Method.POST;
+import static curacao.annotations.Route.Method.GET;
+import static curacao.annotations.Route.Method.POST;
 
 /**
  * Rooms: the chat page for a room, and finding or creating a room by name.
@@ -61,7 +61,7 @@ public final class Room extends AbstractPusaChatController {
     /**
      * The chat page for the room a room token was issued for.
      */
-    @RequestMapping(value = "^/api/room/" + TOKEN_REGEX + "$",
+    @Route(value = "^/api/room/" + TOKEN_REGEX + "$",
             methods = GET)
     public FreeMarkerContent show(
             @Path("token") final String token) {
@@ -73,7 +73,7 @@ public final class Room extends AbstractPusaChatController {
                 .build();
     }
 
-    @RequestMapping(value = "^/api/room/join\\.json$",
+    @Route(value = "^/api/room/join\\.json$",
             methods = POST)
     public ChatRoom join(
             @RequestBody("name") final String name) {
@@ -81,14 +81,14 @@ public final class Room extends AbstractPusaChatController {
         return rooms_.getRoomByName(requireParam("name", name).toLowerCase(Locale.ROOT), false);
     }
 
-    @RequestMapping(value = "^/api/room/create\\.json$",
+    @Route(value = "^/api/room/create\\.json$",
             methods = POST)
     public ChatRoom create(
             @RequestBody("name") final String name) {
         return rooms_.getRoomByName(requireParam("name", name).toLowerCase(Locale.ROOT), true);
     }
 
-    @RequestMapping(value = "^/api/room/random\\.json$",
+    @Route(value = "^/api/room/random\\.json$",
             methods = GET)
     public ChatRoom random() {
         final String name = RandomStringUtils.secure().nextAlphanumeric(RANDOM_ROOM_NAME_LENGTH);

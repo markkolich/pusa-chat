@@ -5,7 +5,7 @@ This file provides guidance to Claude Code when working with this repository.
 ## Project Overview
 
 Pusa Chat: a lightweight, all in memory, multi-user web chat. Runs inside Jetty 11 +
-Curacao 7.2.1 following the same bootstrap pattern as `~/workspace/onyx` and
+Curacao 8.0.0 following the same bootstrap pattern as `~/workspace/onyx` and
 `~/workspace/jasper`. Java 21, single fat JAR. Originally (2012-2014) a Spring 3 MVC + JSP app
 built with SBT; the front-end JavaScript (jQuery 1.7) and the API it calls are unchanged from
 then, apart from restyling to pass ESLint.
@@ -35,10 +35,12 @@ Same pipeline as onyx: a Gulp 5 build run by `frontend-maven-plugin` 2.0.2, in
 
 ## Architecture
 
-- `Application` starts Jetty (context path from `pusa-chat.context-path`, default `/pusa-chat`);
-  `CuracaoJakartaContextListener` then builds every `@Component` under the `pusachat`
-  boot-package. Static files are served by Jetty's `DefaultServlet` from `/static/*`,
-  `/favicon.ico` and `/robots.txt`; everything else goes to Curacao.
+- `Application` builds Jetty with curacao-jetty11-server's `CuracaoJettyServer.Builder` (context
+  path from `pusa-chat.context-path`, default `/pusa-chat`); Curacao then builds every
+  `@Component` under the `pusachat` boot-package. Static files are served by Jetty's
+  `DefaultServlet` from `/static/*`, `/favicon.ico` and `/robots.txt`; everything else goes to
+  Curacao. Components read the webapp base resource (`src/main/webapp` from source, `webapp/`
+  in the fat JAR) from the `CuracaoJettyServer.BASE_RESOURCE_CONTEXT_ATTRIBUTE` context attribute.
 - `components/chat/ChatRooms` holds every room in memory, by ID and by name, and runs the
   thread that removes clients that stop polling. `ChatSessions` is what a client does in a
   room (register, message, delete, typing, inactivity, wait for the next event). Rooms are

@@ -29,6 +29,7 @@ package pusachat.components.freemarker;
 import curacao.annotations.Component;
 import curacao.annotations.Injectable;
 import curacao.core.servlet.ServletContext;
+import curacao.jetty11.CuracaoJettyServer;
 import freemarker.cache.TemplateLookupContext;
 import freemarker.cache.TemplateLookupResult;
 import freemarker.cache.TemplateLookupStrategy;
@@ -38,7 +39,6 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.TemplateExceptionHandler;
 import org.eclipse.jetty.util.resource.Resource;
-import pusachat.Application;
 import pusachat.exceptions.PusaChatException;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * FreeMarker, loading templates from the web-application's base resource (see
- * {@link Application}): {@code src/main/webapp} in dev, {@code webapp/} inside the fat JAR.
+ * {@link CuracaoJettyServer}): {@code src/main/webapp} in dev, {@code webapp/} inside the fat JAR.
  */
 @Component
 public final class PusaChatFreeMarkerConfig {
@@ -59,7 +59,7 @@ public final class PusaChatFreeMarkerConfig {
     public PusaChatFreeMarkerConfig(
             final ServletContext servletContext) {
         final Resource baseResource =
-                servletContext.getAttribute(Application.CONTEXT_ATTRIBUTE_BASE_RESOURCE);
+                servletContext.getAttribute(CuracaoJettyServer.BASE_RESOURCE_CONTEXT_ATTRIBUTE);
 
         // 2.3.34+ also exposes Java record components as properties, e.g. ${user.username}.
         freemarkerConfig_ = new Configuration(Configuration.VERSION_2_3_34);
